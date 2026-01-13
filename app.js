@@ -50,10 +50,10 @@ class BusinessCardGenerator {
             }
         };
 
-        // Sample data
+        // Sample data as placeholders (not values)
         this.sampleData = {
-            name: "Alex Johnson",
-            title: "Senior Software Engineer",
+            fullName: "Alex Johnson",
+            jobTitle: "Senior Software Engineer",
             company: "TechCorp Solutions",
             department: "Product Development",
             email: "alex.johnson@techcorp.com",
@@ -61,8 +61,8 @@ class BusinessCardGenerator {
             website: "www.alexjohnson.dev",
             linkedin: "linkedin.com/in/alexjohnson",
             github: "github.com/alexjohnson",
-            about: "Passionate full-stack developer with 8+ years of experience building scalable web applications and leading development teams.",
-            skills: "React, Node.js, Python, AWS, TypeScript, MongoDB"
+            about: "Passionate developer with experience...",
+            skills: "React, Node.js, Python, AWS"
         };
 
         this.init();
@@ -70,7 +70,7 @@ class BusinessCardGenerator {
 
     init() {
         this.bindEventListeners();
-        this.loadSampleData();
+        this.setPlaceholders();
         this.loadFromStorage();
         this.updateCard();
         this.generateQRCode();
@@ -155,12 +155,12 @@ class BusinessCardGenerator {
         businessCard.style.animation = 'cardSlideIn 0.6s ease-out';
     }
 
-    loadSampleData() {
-        // Load sample data into form fields
+    setPlaceholders() {
+        // Set sample data as placeholders (not values)
         Object.keys(this.sampleData).forEach(key => {
             const input = document.getElementById(key);
             if (input) {
-                input.value = this.sampleData[key];
+                input.placeholder = this.sampleData[key];
             }
         });
     }
