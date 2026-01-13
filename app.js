@@ -166,17 +166,23 @@ class BusinessCardGenerator {
     }
 
     updateCard() {
-        // Update name
-        const name = document.getElementById('fullName').value || this.sampleData.name;
-        document.getElementById('displayName').textContent = name;
+        // Update name - empty if no input
+        const name = document.getElementById('fullName').value.trim();
+        const displayName = document.getElementById('displayName');
+        displayName.textContent = name || '';
+        displayName.classList.toggle('hidden', !name);
 
-        // Update title
-        const title = document.getElementById('jobTitle').value || this.sampleData.title;
-        document.getElementById('displayTitle').textContent = title;
+        // Update title - empty if no input
+        const title = document.getElementById('jobTitle').value.trim();
+        const displayTitle = document.getElementById('displayTitle');
+        displayTitle.textContent = title || '';
+        displayTitle.classList.toggle('hidden', !title);
 
-        // Update company
-        const company = document.getElementById('company').value || this.sampleData.company;
-        document.getElementById('displayCompany').textContent = company;
+        // Update company - empty if no input
+        const company = document.getElementById('company').value.trim();
+        const displayCompany = document.getElementById('displayCompany');
+        displayCompany.textContent = company || '';
+        displayCompany.classList.toggle('hidden', !company);
 
         // Update contact information
         this.updateContactInfo();
@@ -184,9 +190,11 @@ class BusinessCardGenerator {
         // Update social links
         this.updateSocialLinks();
 
-        // Update about section
-        const about = document.getElementById('about').value || this.sampleData.about;
-        document.getElementById('displayAbout').textContent = about;
+        // Update about section - empty if no input
+        const about = document.getElementById('about').value.trim();
+        const displayAbout = document.getElementById('displayAbout');
+        displayAbout.textContent = about || '';
+        displayAbout.parentElement?.classList.toggle('hidden', !about);
 
         // Update skills
         this.updateSkills();
@@ -199,13 +207,20 @@ class BusinessCardGenerator {
     }
 
     updateContactInfo() {
-        const email = document.getElementById('email').value || this.sampleData.email;
-        const phone = document.getElementById('phone').value || this.sampleData.phone;
-        const phoneSecondary = document.getElementById('phoneSecondary').value;
-        const website = document.getElementById('website').value || this.sampleData.website;
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const phoneSecondary = document.getElementById('phoneSecondary').value.trim();
+        const website = document.getElementById('website').value.trim();
 
-        document.getElementById('displayEmail').textContent = email;
-        document.getElementById('displayPhone').textContent = phone;
+        // Show/hide email
+        const emailContact = document.getElementById('emailContact') || document.getElementById('displayEmail').parentElement;
+        document.getElementById('displayEmail').textContent = email || '';
+        emailContact?.classList.toggle('hidden', !email);
+
+        // Show/hide phone
+        const phoneContact = document.getElementById('phoneContact') || document.getElementById('displayPhone').parentElement;
+        document.getElementById('displayPhone').textContent = phone || '';
+        phoneContact?.classList.toggle('hidden', !phone);
 
         // Show/hide secondary phone
         const phoneSecondaryContact = document.getElementById('phoneSecondaryContact');
@@ -218,10 +233,7 @@ class BusinessCardGenerator {
 
         // Show/hide website
         const websiteContact = document.getElementById('websiteContact');
-        if (website && website !== this.sampleData.website) {
-            document.getElementById('displayWebsite').textContent = website;
-            websiteContact.classList.remove('hidden');
-        } else if (website === this.sampleData.website) {
+        if (website) {
             document.getElementById('displayWebsite').textContent = website;
             websiteContact.classList.remove('hidden');
         } else {
@@ -259,15 +271,23 @@ class BusinessCardGenerator {
     }
 
     updateSkills() {
-        const skillsInput = document.getElementById('skills').value || this.sampleData.skills;
+        const skillsInput = document.getElementById('skills').value.trim();
         const skillsContainer = document.getElementById('displaySkills');
-        
+        const skillsSection = skillsContainer.parentElement;
+
         // Clear existing skills
         skillsContainer.innerHTML = '';
-        
+
+        if (!skillsInput) {
+            skillsSection?.classList.add('hidden');
+            return;
+        }
+
+        skillsSection?.classList.remove('hidden');
+
         // Split skills by comma and create tags
         const skills = skillsInput.split(',').map(skill => skill.trim()).filter(skill => skill);
-        
+
         skills.forEach(skill => {
             const skillTag = document.createElement('span');
             skillTag.className = 'skill-tag';
@@ -365,25 +385,26 @@ class BusinessCardGenerator {
     generateQRCode() {
         const qrContainer = document.getElementById('qrCode');
         qrContainer.innerHTML = ''; // Clear existing QR code
-        
-        // Get form data
-        const name = document.getElementById('fullName').value || this.sampleData.name;
-        const title = document.getElementById('jobTitle').value || this.sampleData.title;
-        const company = document.getElementById('company').value || this.sampleData.company;
-        const email = document.getElementById('email').value || this.sampleData.email;
-        const phone = document.getElementById('phone').value || this.sampleData.phone;
-        const website = document.getElementById('website').value || this.sampleData.website;
-        
-        // Create vCard data
-        const vCardData = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-ORG:${company}
-TITLE:${title}
-EMAIL:${email}
-TEL:${phone}
-URL:${website}
-END:VCARD`;
+
+        // Get form data - use actual values only
+        const name = document.getElementById('fullName').value.trim();
+        const title = document.getElementById('jobTitle').value.trim();
+        const company = document.getElementById('company').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const website = document.getElementById('website').value.trim();
+
+        // Build vCard with only non-empty fields
+        let vCardLines = ['BEGIN:VCARD', 'VERSION:3.0'];
+        if (name) vCardLines.push(`FN:${name}`);
+        if (company) vCardLines.push(`ORG:${company}`);
+        if (title) vCardLines.push(`TITLE:${title}`);
+        if (email) vCardLines.push(`EMAIL:${email}`);
+        if (phone) vCardLines.push(`TEL:${phone}`);
+        if (website) vCardLines.push(`URL:${website}`);
+        vCardLines.push('END:VCARD');
+
+        const vCardData = vCardLines.join('\n');
 
         // Determine QR code colors based on template
         const template = this.templates[this.currentTemplate];
@@ -518,37 +539,41 @@ END:VCARD`;
     }
 
     exportVCard() {
-        const name = document.getElementById('fullName').value || this.sampleData.name;
-        const title = document.getElementById('jobTitle').value || this.sampleData.title;
-        const company = document.getElementById('company').value || this.sampleData.company;
-        const email = document.getElementById('email').value || this.sampleData.email;
-        const phone = document.getElementById('phone').value || this.sampleData.phone;
-        const phoneSecondary = document.getElementById('phoneSecondary').value;
-        const website = document.getElementById('website').value || this.sampleData.website;
-        const address = document.getElementById('address').value;
-        
-        const vCardData = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-ORG:${company}
-TITLE:${title}
-EMAIL:${email}
-TEL;TYPE=WORK:${phone}${phoneSecondary ? `\nTEL;TYPE=CELL:${phoneSecondary}` : ''}
-URL:${website}${address ? `\nADR;TYPE=WORK:;;${address.replace(/\n/g, ';')};;;;` : ''}
-END:VCARD`;
+        const name = document.getElementById('fullName').value.trim();
+        const title = document.getElementById('jobTitle').value.trim();
+        const company = document.getElementById('company').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const phoneSecondary = document.getElementById('phoneSecondary').value.trim();
+        const website = document.getElementById('website').value.trim();
+        const address = document.getElementById('address').value.trim();
+
+        // Build vCard with only non-empty fields
+        let vCardLines = ['BEGIN:VCARD', 'VERSION:3.0'];
+        if (name) vCardLines.push(`FN:${name}`);
+        if (company) vCardLines.push(`ORG:${company}`);
+        if (title) vCardLines.push(`TITLE:${title}`);
+        if (email) vCardLines.push(`EMAIL:${email}`);
+        if (phone) vCardLines.push(`TEL;TYPE=WORK:${phone}`);
+        if (phoneSecondary) vCardLines.push(`TEL;TYPE=CELL:${phoneSecondary}`);
+        if (website) vCardLines.push(`URL:${website}`);
+        if (address) vCardLines.push(`ADR;TYPE=WORK:;;${address.replace(/\n/g, ';')};;;;`);
+        vCardLines.push('END:VCARD');
+
+        const vCardData = vCardLines.join('\n');
 
         const blob = new Blob([vCardData], { type: 'text/vcard' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `${this.getFileName()}_contact.vcf`;
         link.click();
-        
+
         URL.revokeObjectURL(link.href);
     }
 
     getFileName() {
-        const name = document.getElementById('fullName').value || this.sampleData.name;
-        return name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        const name = document.getElementById('fullName').value.trim();
+        return (name || 'business_card').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
     }
 
     saveToStorage() {
