@@ -193,8 +193,9 @@ class BusinessCardGenerator {
         // Update about section - empty if no input
         const about = document.getElementById('about').value.trim();
         const displayAbout = document.getElementById('displayAbout');
+        const aboutSection = displayAbout.closest('.about-section');
         displayAbout.textContent = about || '';
-        displayAbout.parentElement?.classList.toggle('hidden', !about);
+        aboutSection?.classList.toggle('hidden', !about);
 
         // Update skills
         this.updateSkills();
@@ -273,7 +274,7 @@ class BusinessCardGenerator {
     updateSkills() {
         const skillsInput = document.getElementById('skills').value.trim();
         const skillsContainer = document.getElementById('displaySkills');
-        const skillsSection = skillsContainer.parentElement;
+        const skillsSection = skillsContainer.closest('.skills-section');
 
         // Clear existing skills
         skillsContainer.innerHTML = '';
@@ -327,18 +328,24 @@ class BusinessCardGenerator {
 
     handleProfilePictureUpload(event) {
         const file = event.target.files[0];
+        const profileImage = document.getElementById('profileImage');
         if (file) {
             if (file.size > 5 * 1024 * 1024) { // 5MB limit
                 alert('Please select an image smaller than 5MB');
                 return;
             }
-            
+
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('profileImage').src = e.target.result;
+                profileImage.src = e.target.result;
+                profileImage.classList.remove('hidden');
                 this.saveToStorage();
             };
             reader.readAsDataURL(file);
+        } else {
+            // No file selected - hide the image
+            profileImage.src = '';
+            profileImage.classList.add('hidden');
         }
     }
 
@@ -471,9 +478,14 @@ class BusinessCardGenerator {
     resetForm() {
         if (confirm('Are you sure you want to reset all fields? This will clear your current data.')) {
             document.getElementById('businessCardForm').reset();
-            document.getElementById('profileImage').src = 'https://images.unsplash.com/photo-1494790108755-2616b0c2c5b6?w=150&h=150&fit=crop&crop=face';
+            // Hide profile image
+            const profileImage = document.getElementById('profileImage');
+            profileImage.src = '';
+            profileImage.classList.add('hidden');
+            // Hide company logo
             document.getElementById('companyLogoDisplay').classList.add('hidden');
-            this.loadSampleData();
+            document.getElementById('companyLogoDisplay').src = '';
+            // Update card to show empty state
             this.updateCard();
             localStorage.removeItem('businessCardData');
         }
@@ -615,10 +627,15 @@ class BusinessCardGenerator {
                 }
                 
                 // Load images
+                const profileImage = document.getElementById('profileImage');
                 if (data.profileImageSrc && data.profileImageSrc.startsWith('data:')) {
-                    document.getElementById('profileImage').src = data.profileImageSrc;
+                    profileImage.src = data.profileImageSrc;
+                    profileImage.classList.remove('hidden');
+                } else {
+                    profileImage.src = '';
+                    profileImage.classList.add('hidden');
                 }
-                
+
                 if (data.companyLogoSrc && data.companyLogoSrc.startsWith('data:')) {
                     document.getElementById('companyLogoDisplay').src = data.companyLogoSrc;
                     document.getElementById('companyLogoDisplay').classList.remove('hidden');
